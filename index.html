@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Streaming</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 28px;
+        }
+        
+        /* Estilos para el popup motivacional */
+        .popup-motivacional {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #3498db, #2ecc71);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 80%;
+            text-align: center;
+            animation: aparecer 0.5s ease-out;
+            display: none;
+        }
+        
+        @keyframes aparecer {
+            from { opacity: 0; transform: translate(-50%, -40%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+        
+        .popup-motivacional h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        .popup-motivacional p {
+            font-size: 18px;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .popup-motivacional button {
+            background: white;
+            color: #3498db;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+        
+        .popup-motivacional button:hover {
+            background: #f1f1f1;
+            transform: translateY(-2px);
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+        
+        /* Resto de tus estilos... */
+        .input-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+        }
+        
+        label {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        
+        input, select {
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            align-self: flex-end;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        th {
+            background-color: #3498db;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .currency {
+            font-weight: bold;
+        }
+        
+        .costo {
+            color: #e74c3c;
+        }
+        
+        .venta {
+            color: #2ecc71;
+        }
+        
+        .ganancia {
+            color: #f39c12;
+        }
+        
+        .ganancia-usd {
+            color: #9b59b6;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        
+        .action-buttons button {
+            align-self: center;
+            padding: 8px 15px;
+        }
+        
+        .limpiar-btn {
+            background-color: #e74c3c;
+        }
+        
+        .limpiar-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .nuevo-servicio-container {
+            display: none;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border: 1px dashed #3498db;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .input-container {
+                flex-direction: column;
+            }
+            
+            .input-group {
+                width: 100%;
+            }
+            
+            th, td {
+                padding: 8px 10px;
+                font-size: 14px;
+            }
+            
+            .popup-motivacional {
+                max-width: 90%;
+                padding: 20px;
+            }
+            
+            .popup-motivacional h3 {
+                font-size: 20px;
+            }
+            
+            .popup-motivacional p {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Popup Motivacional -->
+    <div class="overlay" id="overlay"></div>
+    <div class="popup-motivacional" id="popupMotivacional">
+        <h3 id="saludoTitulo"></h3>
+        <p id="mensajeMotivacional"></p>
+        <button onclick="cerrarPopup()">¡A VENDER!</button>
+    </div>
+
+    <h2>Calculadora de Servicios de Streaming</h2>
+    
+    <div class="input-container">
+        <div class="input-group">
+            <label for="servicio">Servicio:</label>
+            <select id="servicio" onchange="actualizarCampos()">
+                <option value="">Seleccione un servicio</option>
+                <option value="Netflix">Netflix</option>
+                <option value="Amazon Prime">Amazon Prime</option>
+                <option value="Disney Plus">Disney Plus</option>
+                <option value="Max Premium">Max Premium</option>
+                <option value="Crunchyroll">Crunchyroll</option>
+                <option value="Flujotv">Flujotv</option>
+                <option value="PanaxStreaming">PanaxStreaming</option>
+                <option value="Spotify">Spotify</option>
+                <option value="YouTube Premium">YouTube Premium</option>
+                <option value="nuevo">+ Agregar nuevo servicio</option>
+            </select>
+            
+            <div id="nuevoServicioContainer" class="nuevo-servicio-container">
+                <div class="input-group">
+                    <label for="nombreNuevoServicio">Nombre del nuevo servicio:</label>
+                    <input type="text" id="nombreNuevoServicio">
+                </div>
+                <div class="input-group">
+                    <label for="precioNuevoServicio">Precio en USD:</label>
+                    <input type="number" id="precioNuevoServicio" step="0.01" min="0">
+                </div>
+                <div class="input-group">
+                    <label for="pantallasNuevoServicio">Pantallas disponibles:</label>
+                    <input type="number" id="pantallasNuevoServicio" min="1" value="8">
+                </div>
+                <div class="input-group">
+                    <label for="precioVentaNuevoServicio">Precio venta por pantalla (Bs):</label>
+                    <input type="number" id="precioVentaNuevoServicio" min="0" value="185">
+                </div>
+                <button onclick="agregarNuevoServicio()">Guardar Servicio</button>
+            </div>
+        </div>
+        
+        <div class="input-group">
+            <label for="precioDolar">Tipo de cambio (USD a Bs):</label>
+            <input type="number" id="precioDolar" value="1" step="0.01" min="0">
+        </div>
+        
+        <div class="input-group">
+            <label for="precioCuenta">Precio de cuenta (USD):</label>
+            <input type="number" id="precioCuenta" step="0.01" min="0">
+        </div>
+        
+        <div class="input-group">
+            <label for="pantallas">Pantallas disponibles:</label>
+            <input type="number" id="pantallas" value="8" min="1">
+        </div>
+        
+        <div class="input-group">
+            <label for="precioVenta">Precio venta por pantalla (Bs):</label>
+            <input type="number" id="precioVenta" value="185" min="0">
+        </div>
+        
+        <button onclick="calcular()">Calcular</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Servicio</th>
+                <th>Costo Total</th>
+                <th>Pantallas</th>
+                <th>Costo/Pantalla</th>
+                <th>Precio Venta</th>
+                <th>Ganancia/Pantalla</th>
+                <th>Ganancia Total (Bs)</th>
+                <th>Ganancia (USD)</th>
+            </tr>
+        </thead>
+        <tbody id="tablaCuerpo">
+            <tr id="mensaje-vacio">
+                <td colspan="8">Seleccione un servicio y haga clic en Calcular</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="action-buttons">
+        <button class="limpiar-btn" onclick="limpiarLista()">Limpiar Lista</button>
+    </div>
+    
+    <div class="footer">
+        <p>Calculadora de ganancias para servicios de streaming - Todos los montos en Bolivianos (Bs.)</p>
+    </div>
+
+    <script>
+        // Mostrar popup al cargar la página
+        window.onload = function() {
+            mostrarPopupMotivacional();
+        };
+
+        function mostrarPopupMotivacional() {
+            const horaActual = new Date().getHours();
+            let saludo = '';
+            let mensaje = '';
+            
+            // Determinar el saludo según la hora del día
+            if (horaActual >= 5 && horaActual < 12) {
+                saludo = '¡BUENOS DÍAS RICARDO!';
+                mensaje = 'HOY SERÁ UN DÍA GENIAL EN VENTAS EN TU PLATAFORMA. 🌞\n\nEl sol brilla y tus oportunidades también. ¡Vende y gana como nunca!';
+            } else if (horaActual >= 12 && horaActual < 19) {
+                saludo = '¡BUENAS TARDES RICARDO!';
+                mensaje = 'HOY SERÁ UN DÍA GENIAL EN VENTAS EN TU PLATAFORMA. 🌤️\n\nEl día está en su mejor momento, igual que tus habilidades de venta. ¡A por todas!';
+            } else {
+                saludo = '¡BUENAS NOCHES RICARDO!';
+                mensaje = 'HOY SERÁ UN DÍA GENIAL EN VENTAS EN TU PLATAFORMA. 🌙\n\nLa noche es el momento perfecto para cerrar grandes ventas. ¡El éxito te espera!';
+            }
+            
+            document.getElementById('saludoTitulo').textContent = saludo;
+            document.getElementById('mensajeMotivacional').textContent = mensaje;
+            
+            // Mostrar popup y overlay
+            document.getElementById('overlay').style.display = 'block';
+            document.getElementById('popupMotivacional').style.display = 'block';
+        }
+
+        function cerrarPopup() {
+            document.getElementById('overlay').style.display = 'none';
+            document.getElementById('popupMotivacional').style.display = 'none';
+        }
+
+        // Valores por defecto para cada servicio
+        let serviciosConfig = {
+            "Netflix": { precio: 5.5, pantallas: 8, venta: 185 },
+            "Amazon Prime": { precio: 2, pantallas: 5, venta: 118 },
+            "Disney Plus": { precio: 2.5, pantallas: 7, venta: 125 },
+            "Max Premium": { precio: 8.99, pantallas: 8, venta: 185 },
+            "Crunchyroll": { precio: 7.99, pantallas: 8, venta: 185 },
+            "Flujotv": { precio: 6.50, pantallas: 8, venta: 185 },
+            "PanaxStreaming": { precio: 5.99, pantallas: 8, venta: 185 },
+            "Spotify": { precio: 4.99, pantallas: 8, venta: 185 },
+            "YouTube Premium": { precio: 11.99, pantallas: 8, venta: 185 }
+        };
+
+        function actualizarCampos() {
+            const servicioSelect = document.getElementById('servicio');
+            const servicio = servicioSelect.value;
+            
+            if (servicio === "nuevo") {
+                document.getElementById('nuevoServicioContainer').style.display = 'block';
+                // Limpiar campos principales
+                document.getElementById('precioCuenta').value = '';
+                document.getElementById('pantallas').value = '8';
+                document.getElementById('precioVenta').value = '185';
+            } else {
+                document.getElementById('nuevoServicioContainer').style.display = 'none';
+                
+                if (servicio && serviciosConfig[servicio]) {
+                    const config = serviciosConfig[servicio];
+                    document.getElementById('precioCuenta').value = config.precio;
+                    document.getElementById('pantallas').value = config.pantallas;
+                    document.getElementById('precioVenta').value = config.venta;
+                }
+            }
+        }
+
+        function agregarNuevoServicio() {
+            const nombre = document.getElementById('nombreNuevoServicio').value.trim();
+            const precio = parseFloat(document.getElementById('precioNuevoServicio').value);
+            const pantallas = parseInt(document.getElementById('pantallasNuevoServicio').value);
+            const venta = parseFloat(document.getElementById('precioVentaNuevoServicio').value);
+            
+            if (!nombre || isNaN(precio) || isNaN(pantallas) || isNaN(venta)) {
+                alert('Por favor complete todos los campos del nuevo servicio');
+                return;
+            }
+            
+            // Agregar el nuevo servicio a la configuración
+            serviciosConfig[nombre] = {
+                precio: precio,
+                pantallas: pantallas,
+                venta: venta
+            };
+            
+            // Agregar el nuevo servicio al select
+            const select = document.getElementById('servicio');
+            const nuevaOpcion = document.createElement('option');
+            nuevaOpcion.value = nombre;
+            nuevaOpcion.textContent = nombre;
+            
+            // Insertar antes de la opción "Agregar nuevo servicio"
+            select.insertBefore(nuevaOpcion, select.lastChild);
+            
+            // Seleccionar el nuevo servicio
+            select.value = nombre;
+            
+            // Ocultar el formulario de nuevo servicio
+            document.getElementById('nuevoServicioContainer').style.display = 'none';
+            
+            // Actualizar campos con los valores del nuevo servicio
+            document.getElementById('precioCuenta').value = precio;
+            document.getElementById('pantallas').value = pantallas;
+            document.getElementById('precioVenta').value = venta;
+            
+            // Limpiar campos del formulario
+            document.getElementById('nombreNuevoServicio').value = '';
+            document.getElementById('precioNuevoServicio').value = '';
+        }
+
+        function calcular() {
+            const servicio = document.getElementById('servicio').value;
+            const dolar = parseFloat(document.getElementById('precioDolar').value) || 1;
+            const precioCuenta = parseFloat(document.getElementById('precioCuenta').value) || 0;
+            const pantallas = parseInt(document.getElementById('pantallas').value) || 1;
+            const precioVenta = parseFloat(document.getElementById('precioVenta').value) || 0;
+            
+            if (!servicio || servicio === "nuevo") {
+                alert('Por favor seleccione un servicio válido');
+                return;
+            }
+
+            const cuentaCompleta = precioCuenta * dolar;
+            const costoPorPantalla = cuentaCompleta / pantallas;
+            const gananciaPorPantalla = precioVenta - costoPorPantalla;
+            const gananciaTotalBs = gananciaPorPantalla * pantallas;
+            const gananciaUsd = gananciaTotalBs / dolar;
+            
+            const tbody = document.getElementById('tablaCuerpo');
+            
+            // Eliminar mensaje de tabla vacía si existe
+            const mensajeVacio = document.getElementById('mensaje-vacio');
+            if (mensajeVacio) {
+                mensajeVacio.remove();
+            }
+            
+            // Crear nueva fila con los resultados
+            const nuevaFila = document.createElement('tr');
+            nuevaFila.innerHTML = `
+                <td>${servicio}</td>
+                <td class="currency costo">Bs. ${cuentaCompleta.toFixed(2)}</td>
+                <td>${pantallas}</td>
+                <td class="currency costo">Bs. ${costoPorPantalla.toFixed(2)}</td>
+                <td class="currency venta">Bs. ${precioVenta.toFixed(2)}</td>
+                <td class="currency ganancia">Bs. ${gananciaPorPantalla.toFixed(2)}</td>
+                <td class="currency ganancia">Bs. ${gananciaTotalBs.toFixed(2)}</td>
+                <td class="currency ganancia-usd">$${gananciaUsd.toFixed(2)}</td>
+            `;
+            
+            // Agregar la nueva fila al inicio de la tabla
+            tbody.insertBefore(nuevaFila, tbody.firstChild);
+        }
+
+        function limpiarLista() {
+            const tbody = document.getElementById('tablaCuerpo');
+            tbody.innerHTML = '<tr id="mensaje-vacio"><td colspan="8">Seleccione un servicio y haga clic en Calcular</td></tr>';
+        }
+    </script>
+</body>
+</html>
